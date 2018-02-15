@@ -4,7 +4,8 @@ var express = require("express"),
     methodOverride = require("method-override");
 var app = express();
 
-mongo.connect("mongodb://localhost/blog");
+//mongo.connect("mongodb://localhost/blog");
+mongo.connect(process.env.DB);
 
 var blogSchema = new mongo.Schema({
         title: String,
