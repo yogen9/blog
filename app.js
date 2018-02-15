@@ -38,7 +38,7 @@ app.use(methodOverride("_method"));
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 
-app.listen("5000",()=>{
+app.listen(process.env.PORT, process.env.IP, () => {
     console.log("Start...");
 })
 
