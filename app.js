@@ -56,15 +56,12 @@ app.get("/",(req,res)=>{
         }
         else{
             res.status(200).json(blogs)   
-            //res.render("home",{blogs:blogs});
         }
     });
 });
 
 app.get("/new",(req,res)=>{
-    res.status(200).send("OK");
-    //res.render("new");
-    
+    res.status(200).send("OK");    
 })
 
 app.post("/new",(req,res)=>{
@@ -74,7 +71,6 @@ app.post("/new",(req,res)=>{
             return res.status(500).send("Internal server error");
         } else {
             console.log(blog);
-            //res.redirect("/")
             res.status(201).json(blog);
             
         }
@@ -84,12 +80,10 @@ app.post("/new",(req,res)=>{
 app.get("/show/:id",(req,res)=> { 
     blogs.findById(req.params.id).populate("comments").exec((err, blogwithComments) => {
         if (err) {
-           // res.redirect("/");
             console.log(err);
             return res.status(500).send("Internal server error");
         } else {
             res.status(200).json({blog : blogwithComments})            
-            //res.render("show", {blog: blogwithComments});
         }        
     })
 })
@@ -109,7 +103,6 @@ app.post("/show/:id/commentNew", (req,res)=>{
                     }else{
                          console.log(arrayComments);
                          res.status(201).json(blog);
-                        // res.redirect("/show/"+req.params.id)
                     }
                 })
             })
@@ -124,7 +117,6 @@ app.get("/show/:id/update",(req,res)=>{
             return res.status(500).send("Internal server error");
         } else {
             res.status(200).send("OK").json(blog)
-            //res.render("update", { blog: blog});
         }
     })
 })
@@ -137,8 +129,7 @@ app.put("/show/:id/update", (req, res) => {
                response: 'a PUT request for EDITING blog',
                blogId: req.params.id,
                body: req.body,
-           });
-           // res.redirect("/show/" + req.params.id);   
+           });  
        }
     })
 })
@@ -151,7 +142,6 @@ app.delete("/show/:id",(req,res)=>{
             }
             else{
                 res.status(204).send("NO CONTENT");
-                //res.redirect("/")
             }
     })
 })
