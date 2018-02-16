@@ -2,7 +2,15 @@ var express = require("express"),
     bodyParser = require("body-parser"),
     mongo = require("mongoose"),
     methodOverride = require("method-override");
+
 var app = express();
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
+app.use(methodOverride("_method"));
+app.set("view engine", "ejs");
+app.use(express.static("public"));
 
 //mongo.connect("mongodb://localhost/blog");
 mongo.connect(process.env.DB);
@@ -32,39 +40,43 @@ var commentsSchema  = new mongo.Schema({
 })
 var comments = mongo.model("comment", commentsSchema);
 
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-app.use(methodOverride("_method"));
-app.set("view engine", "ejs");
-app.use(express.static("public"));
 
-app.listen(process.env.PORT || 5000, process.env.IP, () => {
+
+app.listen(process.env.PORT|| 5000,process.env.IP, () => {
     console.log("Start...");
 })
+
+
 
 app.get("/",(req,res)=>{
     blogs.find({},(err,blogs)=>{
         if (err) {
             console.log("Error Home : ")
+            return res.status(500).send("Internal server error");
         }
         else{
-            res.render("home",{blogs:blogs});   
+            res.status(200).json(blogs)   
+            //res.render("home",{blogs:blogs});
         }
     });
 });
 
 app.get("/new",(req,res)=>{
-    res.render("new");
+    res.status(200).send("OK");
+    //res.render("new");
+    
 })
 
 app.post("/new",(req,res)=>{
     blogs.create(req.body,(err,blog)=>{
         if (err) {
-            console.log("error in new post : ")
+            console.log("error in new post : ");
+            return res.status(500).send("Internal server error");
         } else {
             console.log(blog);
-            res.redirect("/")
+            //res.redirect("/")
+            res.status(201).json(blog);
+            
         }
     })
 })
@@ -72,10 +84,12 @@ app.post("/new",(req,res)=>{
 app.get("/show/:id",(req,res)=> { 
     blogs.findById(req.params.id).populate("comments").exec((err, blogwithComments) => {
         if (err) {
-            res.redirect("/");
+           // res.redirect("/");
             console.log(err);
+            return res.status(500).send("Internal server error");
         } else {
-            res.render("show", {blog: blogwithComments});
+            res.status(200).json({blog : blogwithComments})            
+            //res.render("show", {blog: blogwithComments});
         }        
     })
 })
@@ -83,7 +97,7 @@ app.get("/show/:id",(req,res)=> {
 app.post("/show/:id/commentNew", (req,res)=>{
     comments.create(req.body,(err,comment)=>{
         if (err) {
-            console.log("error in new comment post :");
+            return res.status(500).send("Internal server error");
         } else {
             blogs.findById(req.params.id,(err,blog)=>{
                 console.log(blog);
@@ -91,9 +105,11 @@ app.post("/show/:id/commentNew", (req,res)=>{
                 blog.save((err,arrayComments)=>{
                     if(err){
                         console.log("err in post commentNew")
+                        return res.status(500).send("Internal server error");
                     }else{
                          console.log(arrayComments);
-                         res.redirect("/show/"+req.params.id)
+                         res.status(201).json(blog);
+                        // res.redirect("/show/"+req.params.id)
                     }
                 })
             })
@@ -105,15 +121,25 @@ app.get("/show/:id/update",(req,res)=>{
     blogs.findById(req.params.id,(err,blog)=>{ 
         if (err) {
             console.log("error in update get :");
+            return res.status(500).send("Internal server error");
         } else {
-            res.render("update", { blog: blog});
+            res.status(200).send("OK").json(blog)
+            //res.render("update", { blog: blog});
         }
     })
 })
 app.put("/show/:id/update", (req, res) => {
     blogs.findByIdAndUpdate(req.params.id, req.body, (err, upBlog) => {
-        if (!err)
-            res.redirect("/show/" + req.params.id);
+        if (err)
+            return res.status(500).send("Internal server error");
+       else{
+           res.status(201).json({
+               response: 'a PUT request for EDITING blog',
+               blogId: req.params.id,
+               body: req.body,
+           });
+           // res.redirect("/show/" + req.params.id);   
+       }
     })
 })
 
@@ -121,9 +147,11 @@ app.delete("/show/:id",(req,res)=>{
     blogs.findByIdAndRemove(req.params.id,(err,r)=>{
             if (err) {
                 console.log("error in del :")
+                res.status(500).send("intrnal server erroer")
             }
             else{
-                res.redirect("/")
+                res.status(204).send("NO CONTENT");
+                //res.redirect("/")
             }
     })
 })
